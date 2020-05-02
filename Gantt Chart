@@ -1,0 +1,172 @@
+<?
+include ("top_level.php");
+?>
+<section id="artikel">
+<div class="container">
+<!--scrip highganttchart-->
+<script src="assets/highgantt/code/highcharts-gantt.js"></script>
+<script src="assets/highgantt/code/modules/exporting.js"></script>
+
+<?
+$filename='Gantt_OERM_'.date("Y/m/d");
+?>
+<div class="container">
+<div id="grafik"></div>
+<style>
+#container, #button-container {
+    max-width: 100%;
+    margin: 1em auto;
+}
+#pdf {
+	border: 1px solid silver;
+	border-radius: 3px;
+	background: #a4edba;
+    padding: 0.5em 1em;
+}
+</style>
+<script type="text/javascript">
+
+Highcharts.ganttChart('grafik', {
+	
+    title: {
+        text: 'Divisi Operation & Enterprise Risk Management'
+    },
+	subtitle: {
+        text: 'Proker Tahun 2020'
+    },
+    xAxis: {
+        tickPixelInterval: 50
+    },
+
+    yAxis: {
+        type: 'category',
+        grid: {
+            enabled: true,
+            borderColor: 'rgba(0,0,0,0.3)',
+            borderWidth: 1,
+            columns: [
+			{
+                title: {
+                    text: 'Status'
+                },
+                labels: {
+                    format: '{point.status}'
+                }
+            },
+			{
+                title: {
+                    text: 'Project'
+                },
+                labels: {
+                    format: '{point.name}'
+                }
+            }, 
+			{
+                title: {
+                    text: 'Assignee'
+                },
+                labels: {
+                    format: '{point.assignee}'
+                }
+            }, 
+			/*
+			{
+                title: {
+                    text: 'Est. days'
+                },
+                labels: {
+                    formatter: function () {
+                        var point = this.point,
+                            days = (1000 * 60 * 60 * 24),
+                            number = (point.x2 - point.x) / days;
+                        return Math.round(number * 100) / 100;
+                    }
+                }
+            }, 
+			*/
+			{
+                labels: {
+                    format: '{point.start:%e. %b}'
+                },
+                title: {
+                    text: 'Start date'
+                }
+            }, 
+			{
+                title: {
+                    text: 'End date'
+                },
+                offset: 30,
+                labels: {
+                    format: '{point.end:%e. %b}'
+                }
+            },
+			
+			]
+        }
+    },
+	credits: {
+            enabled: false
+		},
+    tooltip: {
+        xDateFormat: '%e %b %Y, %H:%M'
+    },
+
+    series: [{
+        name: 'Project 1',
+		data: 'data_gantt_oerm.php',
+		data:
+		[
+		<?
+		include'index.db.php';
+
+		$query = "select concat('Date.UTC(',year(startdate),',',month(startdate)-1,',',day(startdate),')') AS start,
+					concat('Date.UTC(',year(enddate),',',month(enddate)-1,',',day(enddate),')') AS end, 
+					status,
+					name, 
+					assignee, 
+					no, 
+					progress
+		from dt_project";
+		$hasil  =mysql_query($query);
+		while($x = mysql_fetch_array($hasil)){
+		$start=$x["start"];
+		$end=$x["end"];  
+		$status=$x["status"];
+		$name=$x["name"];
+		$assignee=$x["assignee"];
+		$completed=$x["progress"]*1;
+		$y=$x["no"];
+		?>
+			{
+			start: <?=$start?>,
+			end: <?=$end?>,
+			status: '<?=$status?>',
+			name: '<?=$name?>',
+			assignee: '<?=$assignee?>',
+			completed:<?=$completed?>,
+			y: <?=$y?>
+			},
+			<?
+		}
+			?>
+		]
+		
+		
+    }],
+
+    exporting: {
+			sourceWidth: 1000,
+			filename: '<?=$filename?>',
+            
+        },
+
+});
+
+</script>
+</div>
+</div>
+</section>
+<?
+include ("bottom_level.php");
+?>
